@@ -1,0 +1,2 @@
+-r requirements-market.txt
+tensorflow-cpu>=2.16,<3

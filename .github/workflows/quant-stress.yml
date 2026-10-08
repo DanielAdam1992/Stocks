@@ -1,0 +1,37 @@
+name: Quant candidate stress study
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feature/algotrading-backtest-v1']
+    paths:
+      - '.github/workflows/quant-stress.yml'
+      - 'algotrading/stress_runner.py'
+
+permissions:
+  contents: read
+
+jobs:
+  stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install market research dependencies
+        run: python -m pip install -r algotrading/requirements-market.txt
+      - name: Run one-, two-, and three-year sensitivity analysis
+        run: python algotrading/stress_runner.py --out output/stress_study
+      - name: Preserve candidate stress study
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-stress-test
+          path: output/stress_study/
+          retention-days: 30
+          if-no-files-found: warn

@@ -157,3 +157,38 @@ The system aggregates historical stock prices together with macroeconomic indica
 
 ---
 
+
+## Investment firm research / paper-trading pilot (2026)
+
+An independent, unmerged development branch adds a **research-only** investment-firm prototype under [algotrading/](algotrading/). Scope: **US equities/ETFs, $50,000 simulated portfolio, no leverage**.
+
+Implemented so far:
+- Research-only backtest contract accepting **out-of-sample** daily predicted returns (not yet connected to the original neural models).
+- SEC filings analyst for filed-as-of 10-K/10-Q structured facts; time-aware values from the precise filed accession.
+- SEC filing HTML reader that extracts **unverified** candidate MD&A and risk-factor excerpts; subsequent 8-K report monitor.
+- Research runner with CIO / independent risk-veto decision record, role statuses, and broker execution disabled.
+- Synthetic tests and GitHub Actions workflow; read [algotrading/PHASE2.md](algotrading/PHASE2.md) for setup and limitations.
+
+**Current research expansion:** [Quant model tuning and 11-sector/23-industry comparison](algotrading/MODEL_TUNING.md) is now implemented on this development branch. It runs walk-forward baseline/Ridge/HistGradientBoosting/XGBoost forecasts with next-open trade returns; a separate optional LSTM/GRU/CNN architecture re-training comparison is also available. Historical benchmark results live as downloadable GitHub Actions run artifacts, not in `main`. The current experiments do not establish a durable trading edge.
+
+**Not implemented:** verified qualitative filings/news intelligence, externally approved model promotion, multi-asset rebalancing or broker paper trading. The original notebooks and saved model weights have **not** been integrated into a production engine. The goal of 1% net profit/day remains experimental, not a forecast or guarantee.
+
+### Verified quantitative-research milestone (October 8, 2026)
+
+- **All 11 sector ETFs plus SPY tested** in historical, time-aware 252-session out-of-sample simulations; none of the sector models passed the research acceptance screen.
+- **23 individual stocks from different industries tested** under the same rules. Visa alone passed the initial one-year screen; longer-history and greater-cost stress tests did not preserve its pass. No strategy has institutional approval.
+- **Neural architecture families (LSTM, GRU, CNN) re-trained from scratch** for AAPL, XLF, XLE; 126-session matched baseline showed inconsistent improvements compared with CPU methods and all three lagged allocated buy-and-hold.
+- **As-of Quant Research Agent integrated**: reads current historical OHLCV, retrains a forecast using only resolved targets, reports model/forecast and passes it to the CIO research committee. The independent Risk Officer holds all four example research-only signals with zero orders.
+- **No actual broker connection, paper-order execution, real-world profit, or stable 1%-per-day strategy has been established.**
+
+Research workflow links: [sectors](https://github.com/DanielAdam1992/Stocks/actions/runs/37778185709) · [industries](https://github.com/DanielAdam1992/Stocks/actions/runs/37778236537) · [robustness](https://github.com/DanielAdam1992/Stocks/actions/runs/37778570584) · [neural models](https://github.com/DanielAdam1992/Stocks/actions/runs/37778801345) · [latest model-only committee](https://github.com/DanielAdam1992/Stocks/actions/runs/37779466747).
+
+See [algotrading/MODEL_TUNING.md](algotrading/MODEL_TUNING.md) for code, reproducibility instructions and limitations.
+
+### Multi-agent investment laboratory — Phase 4 (October 2026)
+
+The research-only development branch now includes [the multi-asset investment laboratory](algotrading/PHASE4_INVESTMENT_LAB.md). It simulates a single **$50,000** US-equities/ETFs portfolio with industry and security concentration limits, a market-regime filter, next-open accounting, turnover fees, a drawdown circuit breaker, and a passive SPY benchmark. New strategies include **sector rotation**, **sector mean reversion** and **cross-industry stock momentum**. Bull/bear research records, point-in-time earnings data contracts, and a strictly **read-only** Alpaca paper-account connector are implemented; no broker credentials or order placement functionality are installed.
+
+In an initial [504-session portfolio backtest](https://github.com/DanielAdam1992/Stocks/actions/runs/37820464293), sector rotation returned **+7.10%**, sector mean reversion **+0.35%**, and cross-industry momentum **+13.52%**, all below the **+19.84%** risk-budgeted 50% SPY / 50% cash comparator. Returns are cumulative simulated totals, not daily gains. Research artifacts include source-price snapshots, decisions, transaction estimates, and portfolio equity histories. A higher-cost run uses identical market prices. None of the strategies is authorized for trading.
+
+**Reproduce:** `python -m pip install -r algotrading/requirements-market.txt`, then `python algotrading/portfolio_experiments.py --asof 2026-10-07`. See [Phase 4 documentation](algotrading/PHASE4_INVESTMENT_LAB.md) for limitations and exact settings. The project remains an unmerged research prototype; no sustained net 1% daily profitability has been demonstrated.

@@ -1,0 +1,41 @@
+name: Neural model architecture validation
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feature/algotrading-backtest-v1']
+    paths:
+      - '.github/workflows/neural-quant.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        ticker: [AAPL, XLF, XLE]
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      TF_CPP_MIN_LOG_LEVEL: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install optional neural dependencies
+        run: python -m pip install -r algotrading/requirements-neural.txt
+      - name: Compare LSTM GRU CNN at 22 and 66 timesteps on unseen returns
+        run: python algotrading/neural_tuning.py ${{ matrix.ticker }} --oos 126 --retrain 126 --epochs 12 --out output/neural_study
+      - name: Upload full neural audit record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: neural-${{ matrix.ticker }}
+          path: output/neural_study
+          retention-days: 30
+          if-no-files-found: warn

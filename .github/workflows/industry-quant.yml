@@ -1,0 +1,45 @@
+name: Cross-industry stock research
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feature/algotrading-backtest-v1']
+    paths:
+      - '.github/workflows/industry-quant.yml'
+      - 'algotrading/sector_runner.py'
+      - 'algotrading/quant_research.py'
+      - 'algotrading/requirements-market.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  stock_study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install market study requirements
+        run: python -m pip install -r algotrading/requirements-market.txt
+      - name: Run representative industry study
+        run: python algotrading/sector_runner.py --tickers AAPL MSFT NVDA JPM V XOM SLB JNJ UNH CAT GE AMZN HD PG COST NEE DUK LIN FCX PLD AMT META GOOGL --oos 252 --retrain 63 --xgboost --out output/industry_study
+      - name: Show industry research comparison
+        if: always()
+        run: |
+          if [ -f output/industry_study/sector_comparison.csv ]; then
+            python -c "import pandas as pd; d=pd.read_csv('output/industry_study/sector_comparison.csv'); print(d[['ticker','sector','net_return_pct','allocated_buy_hold_return_pct','sharpe','n_entries','n_oos_sessions','passes_research_screen']].to_string(index=False))"
+          fi
+      - name: Preserve full audit records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: industry-walk-forward
+          path: output/industry_study/
+          if-no-files-found: warn
+          retention-days: 30
