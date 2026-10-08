@@ -95,3 +95,22 @@ Broker keys have **not** been connected by this work. `broker_orders` are always
 5. A statistically defensible strategy that beats its risk-matched passive comparator after all costs across multiple independent out-of-sample periods.
 
 No real-money or paper-broker orders are authorized by the current modules.
+
+## Same-snapshot cost-sensitivity results
+
+The higher-cost experiment completed successfully on [GitHub Actions run 37820742173](https://github.com/DanielAdam1992/Stocks/actions/runs/37820742173). The second run loads the first run's persisted adjusted OHLCV inputs, so cost sensitivities are not confounded by a new data download. All returns are cumulative net simulated portfolio values:
+
+| Strategy | 10bps/one-way | 30bps/one-way |
+|---|---:|---:|
+| Sector rotation | +7.10% | +3.21% |
+| Sector mean reversion | +0.35% | -2.12% |
+| Cross-industry momentum | +13.52% | +8.11% |
+| 50% SPY and 50% cash passive comparison | +19.84% | +19.72% |
+
+As expected, increased trading costs hurt frequently rebalanced strategies. This **does not** validate any strategy; all continue to lag passive exposure under the chosen historical period and fixed cohort.
+
+The benchmark incurs a one-time entry trading cost and subsequently allows the SPY position to drift without repetitive commission; it is not a fee-free actively rebalanced portfolio.
+
+## Current verified code quality
+
+GitHub Actions test suite passed with **51 synthetic unit tests** after introduction of the portfolio laboratory, broker reader and event contract. These are algorithm safety/unit tests and do not constitute empirical verification of trading profitability.
