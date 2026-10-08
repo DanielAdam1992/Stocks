@@ -29,7 +29,34 @@ SECTOR_ETFS = {
     "XLC": "Communication Services",
 }
 BENCHMARK = {"SPY": "S&P 500 Benchmark"}
-ALL_ASSETS = {**SECTOR_ETFS, **BENCHMARK}
+# Representative equities for an additional, explicitly NON-exhaustive industry test.
+# Classification is a research label, not a point-in-time GICS history.
+INDUSTRY_STOCKS = {
+    "AAPL": "Technology / Consumer Electronics",
+    "MSFT": "Technology / Software",
+    "NVDA": "Technology / Semiconductors",
+    "JPM": "Financials / Diversified Banks",
+    "V": "Financials / Payment Networks",
+    "XOM": "Energy / Integrated Oil",
+    "SLB": "Energy / Oilfield Services",
+    "JNJ": "Health Care / Pharmaceuticals",
+    "UNH": "Health Care / Managed Care",
+    "CAT": "Industrials / Machinery",
+    "GE": "Industrials / Aerospace",
+    "AMZN": "Consumer Discretionary / E-Commerce",
+    "HD": "Consumer Discretionary / Home Improvement",
+    "PG": "Consumer Staples / Household Products",
+    "COST": "Consumer Staples / Retail",
+    "NEE": "Utilities / Electric Utilities",
+    "DUK": "Utilities / Electric Utilities",
+    "LIN": "Materials / Industrial Gases",
+    "FCX": "Materials / Metals and Mining",
+    "PLD": "Real Estate / Industrial REITs",
+    "AMT": "Real Estate / Tower REITs",
+    "META": "Communication Services / Social Media",
+    "GOOGL": "Communication Services / Interactive Media",
+}
+ALL_ASSETS = {**SECTOR_ETFS, **BENCHMARK, **INDUSTRY_STOCKS}
 
 
 def load_prices(ticker: str, source_dir: str | None = None,
@@ -82,7 +109,7 @@ def evaluate_sector(ticker: str, config: WalkForwardConfig=WalkForwardConfig(),
 
 def main() -> None:
     parser=argparse.ArgumentParser()
-    parser.add_argument("--tickers",nargs="+",default=list(ALL_ASSETS))
+    parser.add_argument("--tickers",nargs="+",default=list(SECTOR_ETFS)+list(BENCHMARK))
     parser.add_argument("--data-dir",default=None,help="Offline raw adjusted OHLCV ETF CSVs")
     parser.add_argument("--start",default="2013-01-01")
     parser.add_argument("--oos",type=int,default=252,help="Historical out-of-sample sessions")
