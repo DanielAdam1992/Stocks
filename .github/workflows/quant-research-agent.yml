@@ -1,0 +1,40 @@
+name: Paper-only quantitative analyst report
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feature/algotrading-backtest-v1']
+    paths:
+      - '.github/workflows/quant-research-agent.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install analysis dependencies
+        run: python -m pip install -r algotrading/requirements-market.txt
+      - name: Run as-of quantitative researcher and risk-veto committee
+        run: |
+          python algotrading/quant_agent.py AAPL --xgboost --out output/quant_agent
+          python algotrading/quant_agent.py V --xgboost --out output/quant_agent
+          python algotrading/quant_agent.py XLK --xgboost --out output/quant_agent
+          python algotrading/quant_agent.py XLE --xgboost --out output/quant_agent
+      - name: Upload research-only signal packets
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quant-research-packets
+          path: output/quant_agent/
+          retention-days: 30
+          if-no-files-found: warn
