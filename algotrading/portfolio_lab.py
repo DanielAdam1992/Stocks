@@ -366,7 +366,9 @@ def run_portfolio(panel: MarketPanel, allocations: Mapping, cfg: PortfolioConfig
     rets=curve["daily_net_return"]
     sharpe=(float(sqrt(252)*rets.mean()/rets.std(ddof=1))
             if len(rets)>1 and rets.std(ddof=1)>1e-12 else None)
-    max_dd=float(min(0.0, (curve["equity_usd"]/curve["equity_usd"].cummax()-1).min()))
+    # The per-bar high-water mark includes the original deposit, so an
+    # immediate first-period loss is also counted as portfolio drawdown.
+    max_dd=float(min(0.0,curve["max_drawdown_so_far"].min()))
     summary={
         "paper_research_only":True,
         "tested_from":curve.iloc[0]["signal_close"],
