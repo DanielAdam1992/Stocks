@@ -61,3 +61,20 @@ All test results are produced on a GitHub Actions runner from data fetched on th
 2. Add purged validation for longer holding periods, embargoes, and an untouched final evaluation period; multiple-testing corrected risk metrics.
 3. Build an asset-level, multi-position portfolio simulator with actual broker-calibrated commissions, opening auction slippage, cash and risk budget.
 4. Connect quant research and SEC/news agent evidence to the CIO committee, then a broker paper account under independent risk controls.
+## Verified experiment runs (2026-10-08)
+
+All values below are *simulated cumulative portfolio returns*, **not daily profits**.
+
+- [11 sector ETFs + SPY, 252 OOS sessions](https://github.com/DanielAdam1992/Stocks/actions/runs/37778185709): all 11 sectors FAILED the multi-metric research screen. Sector results ranged approximately -0.41% (XLU) to +0.55% (XLI) with max 10% instrument allocation.
+- [23 companies across 11 sectors, 252 OOS sessions](https://github.com/DanielAdam1992/Stocks/actions/runs/37778236537): one research-screen pass (V, +1.00% portfolio return versus +0.83% same-allocation passive); the remaining 22 did not pass.
+- [Cost / 1-to-3-year stress test](https://github.com/DanielAdam1992/Stocks/actions/runs/37778570584): Visa failed the 20/40 bps costs and 504/756-day screens; no approved candidate survives robust scrutiny.
+- [Neural architecture training on AAPL, XLF, XLE](https://github.com/DanielAdam1992/Stocks/actions/runs/37778801345) and [matched-date CPU comparison](https://github.com/DanielAdam1992/Stocks/actions/runs/37779122696): in the same 126 sessions, neural portfolio returns were AAPL +2.06%, XLF +0.33%, XLE -0.55%; CPU +1.83%, 0.00%, +0.20%. Same-allocation passive returned +2.90%, +0.56%, +1.49% respectively. No neural run demonstrated passive outperformance.
+- [Research-only as-of quant agent](https://github.com/DanielAdam1992/Stocks/blob/feature/algotrading-backtest-v1/algotrading/quant_agent.py): fits a latest-available-close model with previous labels resolved; produces an auditable forecast and CIO HOLD, without claiming financial/news review or sending any orders.
+
+### Data consistency
+
+Results fetch Yahoo adjusted prices at the time of each workflow run. Adjustments and vendor history revisions mean that repeated fetches might not be byte-for-byte identical; differences between nominally similar runs are not proof of a stable trading edge. Production readiness requires immutable market data snapshots, feed reconciliation, signed model/version metadata and full broker transaction-cost calibration.
+
+### Model selection bias
+
+The 35-instrument screen and subsequent focus on Visa are not an independent, untouched test. A final held-out temporal regime and multi-testing correction (e.g., Deflated Sharpe ratio) are necessary before promoting any candidate. The current passing internal screen is a screening gate, **not** an investment instruction.
