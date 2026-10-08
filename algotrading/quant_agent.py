@@ -14,6 +14,7 @@ from pathlib import Path
 import pandas as pd
 
 from firm import Research, committee_decision
+from bull_bear import investment_debate
 from quant_research import FEATURES, make_features, choose_model, model_factory
 from sector_runner import ALL_ASSETS, load_prices
 
@@ -76,6 +77,7 @@ def run_agent(ticker: str, asof: date | None=None, data_dir: str | None=None,
         "research_mode":"PAPER_ONLY",
         "created_utc":datetime.now(timezone.utc).isoformat(),
         "quant_research":quant,
+        "bull_bear_analysis":investment_debate(ticker,quant,financial=None),
         "committee":{"action":d.action,"risk_approved":d.risk_approved,
                      "rationale":d.rationale},
         "broker_orders":[],
