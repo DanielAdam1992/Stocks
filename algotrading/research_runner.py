@@ -37,6 +37,17 @@ def prepare_committee_record(ticker: str, asof: date, client: SECClient) -> dict
         "subsequent_8k_reports": recent_8k,
         "research_packet": source_packet,
         "investment_committee": asdict(decision),
+        "agent_status": {
+            "fundamental_analyst": "FACTS_VERIFIED" if financial_report.metrics_verified else "DATA_BLOCKED",
+            "filing_reader": "EXCERPTS_NEED_VERIFICATION" if narrative else "NO_FILING",
+            "current_report_monitor": "EVENTS_NEED_REVIEW" if recent_8k else "NO_SUBSEQUENT_8K",
+            "market_news_analyst": "NOT_IMPLEMENTED",
+            "quant_researcher": "NOT_CONNECTED_TO_VALIDATED_MODEL",
+            "portfolio_manager": "NO_APPROVED_TRADE",
+            "risk_officer": "VETO" if not decision.risk_approved else "RESEARCH_GATE_PASSED",
+            "cio": decision.action,
+            "execution_agent": "DISABLED",
+        },
         "execution": {"enabled": False, "reason": "No validated strategy, no broker connected"},
     }
 
