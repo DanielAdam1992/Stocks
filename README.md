@@ -157,3 +157,16 @@ The system aggregates historical stock prices together with macroeconomic indica
 
 ---
 
+
+## Investment firm research / paper-trading pilot (2026)
+
+An independent, unmerged development branch adds a **research-only** investment-firm prototype under [algotrading/](algotrading/). Scope: **US equities/ETFs, $50,000 simulated portfolio, no leverage**.
+
+Implemented so far:
+- Research-only backtest contract accepting **out-of-sample** daily predicted returns (not yet connected to the original neural models).
+- SEC filings analyst for filed-as-of 10-K/10-Q structured facts; time-aware values from the precise filed accession.
+- SEC filing HTML reader that extracts **unverified** candidate MD&A and risk-factor excerpts; subsequent 8-K report monitor.
+- Research runner with CIO / independent risk-veto decision record, role statuses, and broker execution disabled.
+- Synthetic tests and GitHub Actions workflow; read [algotrading/PHASE2.md](algotrading/PHASE2.md) for setup and limitations.
+
+**Not implemented:** full qualitative filing review, verified news intelligence, validated walk-forward trading returns, integrated ML artifacts, multi-asset rebalancing and broker paper trading. No actual or simulated strategy profit has been established. The goal of 1% net profit/day is experimental, not a forecast or guarantee.
