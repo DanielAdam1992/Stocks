@@ -1,0 +1,42 @@
+name: Matched-period CPU versus neural baseline
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feature/algotrading-backtest-v1']
+    paths:
+      - '.github/workflows/neural-baseline.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install market dependencies
+        run: python -m pip install -r algotrading/requirements-market.txt
+      - name: Match neural 126-session evaluation dates
+        run: python algotrading/sector_runner.py --tickers AAPL XLF XLE --oos 126 --retrain 126 --xgboost --out output/neural_cpu_baseline
+      - name: Report CPU baselines
+        if: always()
+        run: |
+          if [ -f output/neural_cpu_baseline/sector_comparison.csv ]; then
+            python -c "import pandas as pd;d=pd.read_csv('output/neural_cpu_baseline/sector_comparison.csv');print(d[['ticker','start','end','net_return_pct','allocated_buy_hold_return_pct','sharpe','n_entries']].to_string(index=False))"
+          fi
+      - name: Preserve comparable results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: neural-cpu-matched-baseline
+          path: output/neural_cpu_baseline/
+          retention-days: 30
+          if-no-files-found: warn
