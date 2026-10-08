@@ -285,6 +285,7 @@ def run_portfolio(panel: MarketPanel, allocations: Mapping, cfg: PortfolioConfig
     spy_equity=cfg.initial_capital
     allocated_spy_equity=cfg.initial_capital
     buy_and_hold_weight=cfg.max_gross_weight
+    buy_and_hold_drifted_weight=buy_and_hold_weight
     spy_entry_cost_paid=False
     cost_rate=(cfg.one_way_fee_bps+cfg.one_way_slippage_bps)/10_000.0
     for t in range(start,len(dates)-2):
@@ -338,7 +339,9 @@ def run_portfolio(panel: MarketPanel, allocations: Mapping, cfg: PortfolioConfig
         if not spy_entry_cost_paid:
             allocated_spy_equity*=(1-buy_and_hold_weight*cost_rate)
             spy_entry_cost_paid=True
-        allocated_spy_equity*=1+buy_and_hold_weight*spy_r
+        buy_and_hold_growth=1+buy_and_hold_drifted_weight*spy_r
+        allocated_spy_equity*=buy_and_hold_growth
+        buy_and_hold_drifted_weight*= (1+spy_r)/buy_and_hold_growth
         bars.append({
             "signal_close":signal_date.isoformat(),
             "execution_open":exec_date.isoformat(),
@@ -363,7 +366,7 @@ def run_portfolio(panel: MarketPanel, allocations: Mapping, cfg: PortfolioConfig
     rets=curve["daily_net_return"]
     sharpe=(float(sqrt(252)*rets.mean()/rets.std(ddof=1))
             if len(rets)>1 and rets.std(ddof=1)>1e-12 else None)
-    max_dd=float((curve["equity_usd"]/curve["equity_usd"].cummax()-1).min())
+    max_dd=float(min(0.0, (curve["equity_usd"]/curve["equity_usd"].cummax()-1).min()))
     summary={
         "paper_research_only":True,
         "tested_from":curve.iloc[0]["signal_close"],
