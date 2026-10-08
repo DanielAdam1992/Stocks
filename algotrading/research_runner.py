@@ -9,13 +9,22 @@ from pathlib import Path
 
 from firm import Research, committee_decision
 from sec_analyst import SECClient, SECError, analyze_company, build_research_packet
+from sec_narrative import read_filing_candidates, extract_recent_8k
 
 
 def prepare_committee_record(ticker: str, asof: date, client: SECClient) -> dict:
     cik, name = client.resolve(ticker)
+    submissions = client.submissions(cik)
     financial_report = analyze_company(
-        ticker, cik, name, client.submissions(cik), client.facts(cik), asof)
+        ticker, cik, name, submissions, client.facts(cik), asof)
+    narrative = (read_filing_candidates(client, cik, financial_report.filing)
+                 if financial_report.filing else None)
+    recent_8k = extract_recent_8k(
+        submissions, cik, asof,
+        financial_report.filing["filed"] if financial_report.filing else None)
     source_packet = build_research_packet(financial_report)
+    if recent_8k:
+        source_packet["red_flags"] += ("unreviewed_8k_current_reports",)
     data = {key: source_packet[key] for key in Research.__dataclass_fields__}
     decision = committee_decision(Research(**data), portfolio_value=50000.0)
     return {
@@ -24,6 +33,8 @@ def prepare_committee_record(ticker: str, asof: date, client: SECClient) -> dict
         "ticker": ticker.upper(),
         "asof": asof.isoformat(),
         "financial_report": financial_report.to_dict(),
+        "filing_narrative": narrative,
+        "subsequent_8k_reports": recent_8k,
         "research_packet": source_packet,
         "investment_committee": asdict(decision),
         "execution": {"enabled": False, "reason": "No validated strategy, no broker connected"},
