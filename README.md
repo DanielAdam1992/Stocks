@@ -172,3 +172,15 @@ Implemented so far:
 **Current research expansion:** [Quant model tuning and 11-sector/23-industry comparison](algotrading/MODEL_TUNING.md) is now implemented on this development branch. It runs walk-forward baseline/Ridge/HistGradientBoosting/XGBoost forecasts with next-open trade returns; a separate optional LSTM/GRU/CNN architecture re-training comparison is also available. Historical benchmark results live as downloadable GitHub Actions run artifacts, not in `main`. The current experiments do not establish a durable trading edge.
 
 **Not implemented:** verified qualitative filings/news intelligence, externally approved model promotion, multi-asset rebalancing or broker paper trading. The original notebooks and saved model weights have **not** been integrated into a production engine. The goal of 1% net profit/day remains experimental, not a forecast or guarantee.
+
+### Verified quantitative-research milestone (October 8, 2026)
+
+- **All 11 sector ETFs plus SPY tested** in historical, time-aware 252-session out-of-sample simulations; none of the sector models passed the research acceptance screen.
+- **23 individual stocks from different industries tested** under the same rules. Visa alone passed the initial one-year screen; longer-history and greater-cost stress tests did not preserve its pass. No strategy has institutional approval.
+- **Neural architecture families (LSTM, GRU, CNN) re-trained from scratch** for AAPL, XLF, XLE; 126-session matched baseline showed inconsistent improvements compared with CPU methods and all three lagged allocated buy-and-hold.
+- **As-of Quant Research Agent integrated**: reads current historical OHLCV, retrains a forecast using only resolved targets, reports model/forecast and passes it to the CIO research committee. The independent Risk Officer holds all four example research-only signals with zero orders.
+- **No actual broker connection, paper-order execution, real-world profit, or stable 1%-per-day strategy has been established.**
+
+Research workflow links: [sectors](https://github.com/DanielAdam1992/Stocks/actions/runs/37778185709) · [industries](https://github.com/DanielAdam1992/Stocks/actions/runs/37778236537) · [robustness](https://github.com/DanielAdam1992/Stocks/actions/runs/37778570584) · [neural models](https://github.com/DanielAdam1992/Stocks/actions/runs/37778801345) · [latest model-only committee](https://github.com/DanielAdam1992/Stocks/actions/runs/37779466747).
+
+See [algotrading/MODEL_TUNING.md](algotrading/MODEL_TUNING.md) for code, reproducibility instructions and limitations.
