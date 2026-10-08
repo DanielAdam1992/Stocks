@@ -1,0 +1,45 @@
+name: Sector ETF walk-forward study
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feature/algotrading-backtest-v1']
+    paths:
+      - 'algotrading/sector_runner.py'
+      - 'algotrading/quant_research.py'
+      - 'algotrading/requirements-market.txt'
+      - '.github/workflows/sector-quant.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install market research dependencies
+        run: python -m pip install -r algotrading/requirements-market.txt
+      - name: Run 11-sector plus broad-index 252-session walk-forward study
+        run: python algotrading/sector_runner.py --oos 252 --retrain 63 --xgboost --out output/sector_study
+      - name: Print sector comparison
+        if: always()
+        run: |
+          if [ -f output/sector_study/sector_comparison.csv ]; then
+            python -c "import pandas as pd; d=pd.read_csv('output/sector_study/sector_comparison.csv'); print(d[['ticker','sector','net_return_pct','allocated_buy_hold_return_pct','full_buy_hold_return_pct','sharpe','n_entries','n_oos_sessions','passes_research_screen']].to_string(index=False))"
+          fi
+      - name: Upload complete research records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sector-walk-forward
+          path: output/sector_study/
+          if-no-files-found: warn
+          retention-days: 30
