@@ -61,7 +61,7 @@ class WalkForwardConfig:
             raise ValueError("Negative trading thresholds/costs not permitted")
 
 
-def make_features(raw: pd.DataFrame) -> pd.DataFrame:
+def make_features(raw: pd.DataFrame, include_unlabeled: bool=False) -> pd.DataFrame:
     """Accept Date,Open,High,Low,Close,Volume; assume prices adjusted consistently."""
     required = {"Date", "Open", "High", "Low", "Close", "Volume"}
     if not required.issubset(raw.columns):
@@ -110,7 +110,7 @@ def make_features(raw: pd.DataFrame) -> pd.DataFrame:
     df = df.replace([np.inf,-np.inf],np.nan)
     # Leading warm-up rows and trailing unknown targets are dropped;
     # no backfill or forward-fill from future prices.
-    df = df.dropna(subset=[*FEATURES,"target_return"]).reset_index(drop=True)
+    df = df.dropna(subset=[*FEATURES] + ([] if include_unlabeled else ["target_return"])).reset_index(drop=True)
     return df
 
 
