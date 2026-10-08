@@ -34,17 +34,32 @@ jobs:
           --test-sessions 504 --rebalance 5
           --fee-bps 5 --slippage-bps 5
           --out output/portfolio_experiments
+      - name: Stress test the identical input-price snapshot at 30bps per trade-dollar
+        run: >
+          python algotrading/portfolio_experiments.py
+          --data-dir output/portfolio_experiments/market_inputs
+          --asof 2026-10-07 --test-sessions 504 --rebalance 5
+          --fee-bps 10 --slippage-bps 20
+          --out output/portfolio_cost_stress
       - name: Summarize all portfolio experiment results
         if: always()
         run: |
           if [ -f output/portfolio_experiments/summary.json ]; then
             python -c "import json; j=json.load(open('output/portfolio_experiments/summary.json')); [print(g,k, 'NET',round(v['net_return_pct'],3),'SPY RISK MATCH',round(v['spy_risk_budget_return_pct'],3),'MAXDD',round(v['max_drawdown_pct'],3),'COST',round(v['estimated_transaction_cost_usd'],2),'ORDERS',v['order_events']) for g,variants in j['runs'].items() for k,v in variants.items()]"
           fi
+      - name: Print identical-data higher-cost sensitivities
+        if: always()
+        run: |
+          if [ -f output/portfolio_cost_stress/summary.json ]; then
+            python -c "import json; j=json.load(open('output/portfolio_cost_stress/summary.json')); [print('30bps',g,k,'NET',round(v['net_return_pct'],3),'SPY',round(v['spy_risk_budget_return_pct'],3)) for g,variants in j['runs'].items() for k,v in variants.items()]"
+          fi
       - name: Preserve exact input prices, signals, trade ledger and returns
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: multi-asset-research-complete
-          path: output/portfolio_experiments/
+          path: |
+            output/portfolio_experiments/
+            output/portfolio_cost_stress/
           retention-days: 30
           if-no-files-found: warn
