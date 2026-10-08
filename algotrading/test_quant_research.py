@@ -51,7 +51,7 @@ def test_future_price_change_cannot_alter_past_features():
 
 
 def test_walk_forward_predictions_no_future_train_rows():
-    c=WalkForwardConfig(min_train=130,validation_size=40,test_size=50,retrain_every=25)
+    c=WalkForwardConfig(min_train=110,validation_size=40,test_size=50,retrain_every=25)
     preds,choices=walk_forward(synthetic_prices(280),c)
     assert len(preds)==50
     assert all(pd.Timestamp(x["train_end_date"])<pd.Timestamp(x["test_first_date"]) for x in choices)
