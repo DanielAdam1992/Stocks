@@ -31,3 +31,10 @@ The current `firm.py` is **only a deterministic committee gate**: missing eviden
 7. Paper forward testing and independent review before any consideration of live trading.
 
 A 1% net daily profit goal is not a reliable assumption; optimize risk-adjusted performance and survival rather than promising returns.
+
+## Current implementation checkpoint (2026-10-08)
+
+- **Operational code (research):** SEC financial-facts analyst; filing HTML candidate-excerpt reader; SEC 8-K current-report listing; committee runner and deterministic veto gate; standalone backtest harness.
+- **Not operational:** true LLM-based narrative or news analysis, saved-model inference from existing Colab notebooks, live market intelligence, trade portfolio optimizer, autonomous broker connection, compliance automation, and actual model profitability validation.
+- Every agent state is recorded in the research runner's JSON output. Unverified document excerpts and missing analyst roles **must not** be treated as approval.
+- Draft PR #1 on a feature branch is for review; no automatic merge or live deployment.
