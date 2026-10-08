@@ -39,7 +39,7 @@ def asof_signal(raw: pd.DataFrame, ticker: str, asof: date | None=None,
                                candidate_configs(include_xgboost))
     model=model_factory(best["model"],best["params"])
     model.fit(labeled[list(FEATURES)],labeled["target_return"])
-    estimate=float(model.predict(pd.DataFrame([decision[list(FEATURES)]],columns=list(FEATURES)))[0])
+    estimate=float(model.predict(price_features.iloc[[-1]][list(FEATURES)])[0])
     payload={
         "ticker":ticker.upper(),"model":best["model"],
         "parameters":best["params"],
