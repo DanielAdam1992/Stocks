@@ -169,4 +169,6 @@ Implemented so far:
 - Research runner with CIO / independent risk-veto decision record, role statuses, and broker execution disabled.
 - Synthetic tests and GitHub Actions workflow; read [algotrading/PHASE2.md](algotrading/PHASE2.md) for setup and limitations.
 
-**Not implemented:** full qualitative filing review, verified news intelligence, validated walk-forward trading returns, integrated ML artifacts, multi-asset rebalancing and broker paper trading. No actual or simulated strategy profit has been established. The goal of 1% net profit/day is experimental, not a forecast or guarantee.
+**Current research expansion:** [Quant model tuning and 11-sector/23-industry comparison](algotrading/MODEL_TUNING.md) is now implemented on this development branch. It runs walk-forward baseline/Ridge/HistGradientBoosting/XGBoost forecasts with next-open trade returns; a separate optional LSTM/GRU/CNN architecture re-training comparison is also available. Historical benchmark results live as downloadable GitHub Actions run artifacts, not in `main`. The current experiments do not establish a durable trading edge.
+
+**Not implemented:** verified qualitative filings/news intelligence, externally approved model promotion, multi-asset rebalancing or broker paper trading. The original notebooks and saved model weights have **not** been integrated into a production engine. The goal of 1% net profit/day remains experimental, not a forecast or guarantee.
