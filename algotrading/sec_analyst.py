@@ -76,6 +76,27 @@ class SECClient:
         except (HTTPError, URLError, TimeoutError, ValueError) as exc:
             raise SECError(f"SEC request failed: {type(exc).__name__}: {exc}") from exc
 
+
+    def get_filing_html(self, url: str) -> str:
+        """Fetch an official SEC archive document with the declared user agent."""
+        if not url.startswith(f"{SEC_WWW}/Archives/edgar/data/"):
+            raise SECError("Not an official SEC filing archive URL")
+        elapsed = time.monotonic() - self._last_call
+        if elapsed < self.min_interval:
+            time.sleep(self.min_interval - elapsed)
+        req = Request(url, headers={"User-Agent": self.user_agent,
+                                    "Accept": "text/html",
+                                    "Accept-Encoding": "identity"})
+        try:
+            self._last_call = time.monotonic()
+            with urlopen(req, timeout=self.timeout) as response:
+                blob = response.read(15_000_000 + 1)
+                if len(blob) > 15_000_000:
+                    raise SECError("Filing document exceeds 15 MB limit")
+                return blob.decode("utf-8", errors="replace")
+        except (HTTPError, URLError, TimeoutError) as exc:
+            raise SECError(f"SEC filing download failed: {type(exc).__name__}: {exc}") from exc
+
     def resolve(self, ticker: str) -> tuple[int, str]:
         symbol = ticker.strip().upper()
         if not re.fullmatch(r"[A-Z0-9][A-Z0-9.\-]{0,11}", symbol):
