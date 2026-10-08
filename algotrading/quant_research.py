@@ -77,9 +77,19 @@ def make_features(raw: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("Missing/invalid OHLCV; never auto-backfill")
     if (df[["Open","High","Low","Close"]] <= 0).any().any() or (df["Volume"] < 0).any():
         raise ValueError("Nonpositive prices or negative volume")
-    if (df["High"] < df[["Open","Close","Low"]].max(axis=1)).any() or \
-       (df["Low"] > df[["Open","Close","High"]].min(axis=1)).any():
-        raise ValueError("OHLC price bounds invalid")
+    # Most vendors round separately adjusted OHLC prices to different floating precision.
+    # A small tolerance is allowed, but significant violations still fail closed.
+    upper=df[["Open","Close","Low"]].max(axis=1)
+    lower=df[["Open","Close","High"]].min(axis=1)
+    upper_excess=(upper-df["High"]).clip(lower=0)
+    lower_excess=(df["Low"]-lower).clip(lower=0)
+    tolerance=1e-5*df["Close"]
+    violations=(upper_excess>tolerance)|(lower_excess>tolerance)
+    if violations.any():
+        max_error=float((pd.concat([upper_excess,lower_excess],axis=1).max(axis=1) /
+                         df["Close"]).max())
+        raise ValueError(f"OHLC price bounds invalid: rows={int(violations.sum())}, "
+                         f"max_relative_error={max_error:.8%}")
 
     close = df["Close"]
     df["return_1d"] = close.pct_change()
